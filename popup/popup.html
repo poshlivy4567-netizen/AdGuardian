@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="popup.css">
+  <title>AdGuardian</title>
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 20 6v5.4c0 4.8-3.2 8.9-8 10.1-4.8-1.2-8-5.3-8-10.1V6l8-3.5Z"/><path d="m8.4 12 2.2 2.2 5-5"/></svg>
+        </span>
+        <span>AdGuardian</span>
+      </div>
+      <label class="power" aria-label="Включить блокировку">
+        <input type="checkbox" id="toggle" checked>
+        <span class="power-track"><span class="power-knob"></span></span>
+      </label>
+    </header>
+
+    <section class="hero" aria-live="polite">
+      <div class="state-line"><span class="state-dot" id="stateDot"></span><span id="stateText">Защита активна</span></div>
+      <div class="counter" id="count">0</div>
+      <div class="counter-label">запросов остановлено</div>
+    </section>
+
+    <section class="site-card" id="siteCard">
+      <div class="site-icon" aria-hidden="true">⌁</div>
+      <div class="site-copy">
+        <span class="eyebrow">ТЕКУЩИЙ САЙТ</span>
+        <strong id="siteName">Открытая страница</strong>
+        <span id="siteDescription">Защита применяется автоматически</span>
+      </div>
+      <button class="site-button" id="siteToggle" type="button">Пауза</button>
+    </section>
+
+    <section class="details">
+      <div class="detail-row"><span>Правила фильтрации</span><strong id="rules">Загрузка…</strong></div>
+      <div class="detail-row"><span>Последнее обновление</span><strong id="updated">—</strong></div>
+    </section>
+
+    <label class="option-row">
+      <span>
+        <strong>Скрывать рекламные блоки</strong>
+        <small>Убирает контейнеры Google, Яндекс и AdFox</small>
+      </span>
+      <input class="check" type="checkbox" id="cosmetic" checked>
+    </label>
+
+    <p class="notice" id="notice" role="status"></p>
+
+    <div class="actions">
+      <button class="button primary" id="checkUpdates" type="button">Обновить фильтры</button>
+      <button class="button secondary" id="openStats" type="button">Статистика</button>
+    </div>
+    <button class="text-button" id="resetStats" type="button">Сбросить счётчик</button>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

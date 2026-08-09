@@ -1,0 +1,75 @@
+:root {
+  color-scheme: dark;
+  --bg: #0a0d17;
+  --surface: #121727;
+  --surface-2: #181f33;
+  --line: rgba(255, 255, 255, .09);
+  --text: #f2f5ff;
+  --muted: #9aa5bd;
+  --accent: #7c6cff;
+  --accent-2: #a59cff;
+  --green: #47d7a0;
+  --danger: #ff7a91;
+}
+
+* { box-sizing: border-box; }
+body { width: 364px; margin: 0; background: var(--bg); color: var(--text); font: 13px/1.4 Inter, "Segoe UI", system-ui, sans-serif; }
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+.app { padding: 16px; background: radial-gradient(370px 170px at 100% -30px, rgba(124,108,255,.25), transparent 68%), var(--bg); }
+.topbar { display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 750; letter-spacing: -.025em; }
+.brand-mark { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 10px; color: #fff; background: linear-gradient(140deg, var(--accent-2), var(--accent)); box-shadow: 0 8px 18px rgba(90,72,228,.3); }
+.brand-mark svg { width: 18px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.power { position: relative; cursor: pointer; width: 43px; height: 25px; }
+.power input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.power-track { display: block; height: 100%; border-radius: 99px; background: #2a3043; transition: .2s ease; }
+.power-knob { position: absolute; top: 4px; left: 4px; width: 17px; height: 17px; border-radius: 50%; background: #b0b9cb; transition: transform .2s ease, background .2s ease; }
+.power input:checked + .power-track { background: var(--accent); }
+.power input:checked + .power-track .power-knob { transform: translateX(18px); background: white; }
+.power input:focus-visible + .power-track, button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+.hero { padding: 24px 4px 21px; text-align: center; }
+.state-line { display: inline-flex; align-items: center; gap: 6px; color: var(--green); font-size: 12px; font-weight: 650; }
+.state-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(71,215,160,.13); }
+.counter { margin-top: 9px; font-size: 42px; line-height: 1; font-weight: 760; letter-spacing: -.055em; font-variant-numeric: tabular-nums; background: linear-gradient(100deg, #fff, #b8b1ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.counter-label { color: var(--muted); margin-top: 5px; font-size: 12px; }
+
+.site-card { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(130deg, rgba(255,255,255,.055), rgba(255,255,255,.02)); }
+.site-icon { width: 32px; height: 32px; display: grid; place-items: center; color: var(--accent-2); border-radius: 10px; background: rgba(124,108,255,.14); font-size: 21px; transform: rotate(-18deg); }
+.site-copy { min-width: 0; display: grid; }
+.eyebrow { color: #747f99; font-size: 9px; font-weight: 750; letter-spacing: .09em; }
+.site-copy strong { overflow: hidden; margin-top: 1px; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.site-copy span:last-child { overflow: hidden; margin-top: 2px; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.site-button { padding: 6px 9px; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; background: transparent; color: #dbe0ee; cursor: pointer; font-size: 11px; font-weight: 650; }
+.site-button:hover:not(:disabled) { border-color: rgba(255,122,145,.6); color: #ffb2c0; }
+.site-button.resume { border-color: rgba(71,215,160,.42); color: var(--green); }
+.site-button:disabled { opacity: .42; cursor: default; }
+
+.details { margin-top: 12px; padding: 2px 1px; }
+.detail-row { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; color: var(--muted); font-size: 11px; }
+.detail-row strong { color: #d6dced; font-size: 11px; font-weight: 600; text-align: right; }
+
+.option-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 5px; padding: 12px; border-radius: 12px; background: var(--surface); cursor: pointer; }
+.option-row strong, .option-row small { display: block; }
+.option-row strong { font-size: 11px; }
+.option-row small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+.check { position: relative; width: 34px; height: 20px; margin: 0; appearance: none; border-radius: 99px; background: #30374a; cursor: pointer; transition: background .2s ease; }
+.check::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #c3cada; transition: transform .2s ease, background .2s ease; }
+.check:checked { background: var(--accent); }
+.check:checked::after { transform: translateX(14px); background: white; }
+
+.notice { min-height: 0; margin: 0; color: var(--muted); font-size: 10px; }
+.notice:not(:empty) { margin: 10px 2px 0; }
+.notice.success { color: var(--green); }.notice.error { color: var(--danger); }.notice.warning { color: #f6c76d; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 13px; }
+.button { min-height: 36px; border: 1px solid transparent; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 700; transition: transform .16s ease, filter .16s ease; }
+.button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+.button:disabled { opacity: .55; cursor: wait; }
+.primary { color: white; background: linear-gradient(135deg, #897cff, #6858ec); box-shadow: 0 8px 18px rgba(82,63,219,.26); }.secondary { color: #dce2f4; border-color: var(--line); background: var(--surface); }
+.text-button { display: block; margin: 10px auto 0; padding: 2px 5px; border: 0; background: transparent; color: #778299; cursor: pointer; font-size: 10px; }.text-button:hover { color: #d1d8e9; }
+
+.is-off .state-line { color: var(--danger); }.is-off .state-dot { box-shadow: 0 0 0 4px rgba(255,122,145,.12); }.is-off .counter { background: none; color: #a6aec0; -webkit-text-fill-color: #a6aec0; }.is-off .site-card, .is-off .option-row { opacity: .67; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
