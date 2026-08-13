@@ -256,7 +256,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||adriver.ru^",
+      "urlFilter": "||verify.yandex.ru^",
       "resourceTypes": ["main_frame", "sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other", "stylesheet", "font", "websocket"]
     }
   },
@@ -265,7 +265,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||rtbhouse.com^",
+      "urlFilter": "||storage.mds.yandex.net/get-canvas-html5/",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -274,7 +274,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||doubleclick.net^",
+      "urlFilter": "||storage.mds.yandex.net/get-bstor/",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -283,8 +283,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||googleadservices.com^",
-      "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
+      "urlFilter": "||adriver.ru^",
+      "resourceTypes": ["main_frame", "sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other", "stylesheet", "font", "websocket"]
     }
   },
   {
@@ -292,7 +292,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||googlesyndication.com^",
+      "urlFilter": "||rtbhouse.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -301,8 +301,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||pagead2.googlesyndication.com^",
-      "resourceTypes": ["main_frame", "sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+      "urlFilter": "||doubleclick.net^",
+      "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
   {
@@ -310,7 +310,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||adservice.google.*^",
+      "urlFilter": "||googleadservices.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -319,7 +319,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||suprion.ru^",
+      "urlFilter": "||googlesyndication.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -328,8 +328,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||ad.moe.video^",
-      "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
+      "urlFilter": "||pagead2.googlesyndication.com^",
+      "resourceTypes": ["main_frame", "sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
     }
   },
   {
@@ -337,7 +337,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||traffaret.com^",
+      "urlFilter": "||adservice.google.*^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -346,7 +346,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||utraff.com^",
+      "urlFilter": "||suprion.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -355,7 +355,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||skcrtxr.com^",
+      "urlFilter": "||ad.moe.video^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -364,7 +364,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||adx.com.ru^",
+      "urlFilter": "||traffaret.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -373,7 +373,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||acint.net^",
+      "urlFilter": "||utraff.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -382,7 +382,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||hybrid.ai^",
+      "urlFilter": "||skcrtxr.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -391,7 +391,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||giraff.io^",
+      "urlFilter": "||adx.com.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -400,7 +400,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||bidster.net^",
+      "urlFilter": "||acint.net^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -409,7 +409,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||upravel.com^",
+      "urlFilter": "||hybrid.ai^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -418,7 +418,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||otclick-adv.ru^",
+      "urlFilter": "||giraff.io^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -427,7 +427,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||adsp.io^",
+      "urlFilter": "||bidster.net^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -436,7 +436,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||adspector.io^",
+      "urlFilter": "||upravel.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -445,7 +445,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||moviead55.ru^",
+      "urlFilter": "||otclick-adv.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -454,7 +454,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||ad.mail.ru^",
+      "urlFilter": "||adsp.io^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -463,7 +463,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||target.my.com^",
+      "urlFilter": "||adspector.io^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -472,7 +472,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||top-fwz1.mail.ru^",
+      "urlFilter": "||moviead55.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -481,7 +481,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||crosspixel.net^",
+      "urlFilter": "||ad.mail.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -490,7 +490,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||buzzoola.com^",
+      "urlFilter": "||target.my.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -499,7 +499,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||ssp.rambler.ru^",
+      "urlFilter": "||top-fwz1.mail.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -508,7 +508,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||begun.ru^",
+      "urlFilter": "||crosspixel.net^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -517,7 +517,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||relap.io^",
+      "urlFilter": "||buzzoola.com^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -526,7 +526,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||videonow.ru^",
+      "urlFilter": "||ssp.rambler.ru^",
       "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
@@ -535,8 +535,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||pc.alloviewroll.com^",
-      "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+      "urlFilter": "||begun.ru^",
+      "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
   {
@@ -544,8 +544,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||ppc.ipchanger.live^",
-      "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+      "urlFilter": "||relap.io^",
+      "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
   {
@@ -553,8 +553,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||vak345.com^",
-      "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+      "urlFilter": "||videonow.ru^",
+      "resourceTypes": ["image", "script", "xmlhttprequest", "media", "sub_frame", "object", "ping", "other"]
     }
   },
   {
@@ -562,7 +562,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||21wiz.com^",
+      "urlFilter": "||pc.alloviewroll.com^",
       "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
     }
   },
@@ -571,7 +571,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "player_js",
+      "urlFilter": "||ppc.ipchanger.live^",
       "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
     }
   },
@@ -580,7 +580,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "mp_dist",
+      "urlFilter": "||vak345.com^",
       "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
     }
   },
@@ -589,7 +589,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "mstream",
+      "urlFilter": "||21wiz.com^",
       "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
     }
   },
@@ -598,12 +598,39 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "testad=no",
+      "urlFilter": "player_js",
       "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
     }
   },
   {
     "id": 68,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "mp_dist",
+      "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+    }
+  },
+  {
+    "id": 69,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "mstream",
+      "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+    }
+  },
+  {
+    "id": 70,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "testad=no",
+      "resourceTypes": ["sub_frame", "image", "script", "xmlhttprequest", "media", "object", "ping", "other"]
+    }
+  },
+  {
+    "id": 71,
     "priority": 1,
     "action": { "type": "block" },
     "condition": {

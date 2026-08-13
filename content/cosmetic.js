@@ -1,25 +1,28 @@
 // AdGuardian — продвинутая косметическая фильтрация и нейтрализация рекламы.
-// Блокирует sticky-баннеры, РСЯ (Яндекс Директ), AdFox, Google Ads и скрывает рекламные контейнеры.
+// Полная блокировка sticky-баннеров, РСЯ (Яндекс Директ), AdFox, Google Ads и устранение пустых областей/отступов.
 (() => {
   "use strict";
 
   const HIDDEN_CLASS = "adguardian-cosmetic-hidden";
   const STYLE_ID = "adguardian-cosmetic-style";
 
-  // Основной список селекторов рекламных контейнеров, sticky-баннеров и разметки Яндекса
+  // Полный список селекторов рекламных контейнеров, sticky-баннеров и разметки Яндекса
   const AD_SELECTORS = [
-    // --- Sticky-баннеры и адаптивные обёртки Яндекса ---
+    // --- Sticky-баннеры и внешние обёртки Яндекса ---
     ".yandex-sticky-adv-banner__desktop-wrapper",
     ".yandex-sticky-adv-banner__desktop-wrapper_with-disable-ad-button",
     ".yandex-sticky-adv-banner__mobile-wrapper",
     ".yandex-sticky-adv-banner",
     ".yandex-sticky-adv-banner_desktop_right",
     ".yandex-sticky-adv-banner_desktop_additional_right",
+    ".yandex-sticky-adv-banner_desktop_left",
+    ".yandex-sticky-adv-banner_desktop_additional_left",
     ".yandex-sticky-adv-banner_hidden",
     ".yandex-sticky-adv-banner__spinner",
     "[id^='yandex-adv-sticky-banner']",
     "[id*='yandex-adv-sticky']",
     "[id^='yandex-adv-']",
+    "[id*='yandex-adv-']",
     "[class*='yandex-sticky-adv-banner']",
     "[class*='yandex-sticky-adv-']",
     "[class*='yandex-adv-sticky']",
@@ -43,7 +46,7 @@
     "[data-branding-keyword]",
     "[class*='adv-focusable']",
 
-    // --- Яндекс РТБ, Директ, AdFox ---
+    // --- Яндекс РТБ, Директ, AdFox, SafeFrame ---
     "[id^='yandex_rtb']",
     "[id*='yandex_rtb_']",
     "[id^='yandex_ad']",
@@ -66,6 +69,9 @@
     "iframe[src*='awaps.yandex.ru']",
     "iframe[src*='yandex.ru/ads']",
     "iframe[src*='yabs.yandex.ru']",
+    "iframe[src*='safeframe-bundles']",
+    "iframe[name*='ya_partner_']",
+    "iframe[name*='yandex']",
 
     // --- Общие Sticky и плавающие баннеры ---
     "[class*='sticky-banner']",
@@ -134,8 +140,14 @@
       min-height: 0 !important;
       max-height: 0 !important;
       width: 0 !important;
+      min-width: 0 !important;
+      max-width: 0 !important;
       margin: 0 !important;
       padding: 0 !important;
+      border: 0 !important;
+      outline: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
       pointer-events: none !important;
       position: absolute !important;
       overflow: hidden !important;
@@ -170,18 +182,41 @@
               ? (document.getElementById(target) || document.querySelector(target))
               : target;
             if (el) {
-              el.innerHTML = "";
-              el.style.setProperty("display", "none", "important");
-              el.style.setProperty("height", "0", "important");
-              el.style.setProperty("margin", "0", "important");
-              el.style.setProperty("padding", "0", "important");
+              // Ищем внешнюю обёртку sticky баннера
+              let wrapper = el;
+              let parent = el.parentElement;
+              let depth = 0;
+              while (parent && parent !== document.body && parent !== document.documentElement && depth < 5) {
+                const cls = (typeof parent.className === "string" ? parent.className : "").toLowerCase();
+                const id = (parent.id || "").toLowerCase();
+                if (
+                  cls.includes("yandex-sticky") ||
+                  cls.includes("sticky-adv") ||
+                  cls.includes("wrapper_with-disable-ad-button") ||
+                  id.includes("yandex-adv-sticky")
+                ) {
+                  wrapper = parent;
+                }
+                parent = parent.parentElement;
+                depth++;
+              }
+
+              wrapper.innerHTML = "";
+              wrapper.style.setProperty("display", "none", "important");
+              wrapper.style.setProperty("height", "0", "important");
+              wrapper.style.setProperty("min-height", "0", "important");
+              wrapper.style.setProperty("max-height", "0", "important");
+              wrapper.style.setProperty("width", "0", "important");
+              wrapper.style.setProperty("margin", "0", "important");
+              wrapper.style.setProperty("padding", "0", "important");
+              wrapper.style.setProperty("background", "transparent", "important");
+              if (wrapper.remove) wrapper.remove();
             }
           } catch (_) {}
         };
 
         // Защита и перехват yaContextCb
         window.yaContextCb = window.yaContextCb || [];
-        const originalPush = window.yaContextCb.push.bind(window.yaContextCb);
         window.yaContextCb.push = function (...items) {
           for (const item of items) {
             if (typeof item === "function") {
@@ -239,10 +274,28 @@
     if (!element || !(element instanceof Element)) return;
     element.classList.add(HIDDEN_CLASS);
     element.style.setProperty("display", "none", "important");
+    element.style.setProperty("visibility", "hidden", "important");
+    element.style.setProperty("opacity", "0", "important");
     element.style.setProperty("height", "0", "important");
     element.style.setProperty("min-height", "0", "important");
+    element.style.setProperty("max-height", "0", "important");
+    element.style.setProperty("width", "0", "important");
+    element.style.setProperty("min-width", "0", "important");
+    element.style.setProperty("max-width", "0", "important");
     element.style.setProperty("margin", "0", "important");
     element.style.setProperty("padding", "0", "important");
+    element.style.setProperty("border", "0", "important");
+    element.style.setProperty("background", "transparent", "important");
+    element.style.setProperty("box-shadow", "none", "important");
+    element.style.setProperty("pointer-events", "none", "important");
+    element.style.setProperty("position", "absolute", "important");
+    element.style.setProperty("overflow", "hidden", "important");
+    element.style.setProperty("clip", "rect(0, 0, 0, 0)", "important");
+
+    // Удаляем элемент из DOM для полного схлопывания пустых областей
+    try {
+      element.remove();
+    } catch (_) {}
   }
 
   // Поиск внешней обёртки рекламного блока для полного скрытия sticky/контейнеров
@@ -261,17 +314,39 @@
         cls.includes("sticky-banner") ||
         cls.includes("sticky_banner") ||
         cls.includes("floating-banner") ||
+        cls.includes("wrapper_with-disable-ad-button") ||
         id.includes("yandex-adv-sticky") ||
         id.includes("yandex_rtb") ||
         id.includes("adfox") ||
         current.hasAttribute("data-r-a-") ||
-        cls.includes("wrapper_with-disable-ad-button")
+        current.hasAttribute("data-container")
       ) {
         wrapper = current;
       }
       current = current.parentElement;
       depth++;
     }
+
+    // Проверяем родителя найденной обёртки: если это выделенный контейнер под баннер (например, колонка/боковая панель без другого контента)
+    if (wrapper && wrapper.parentElement && wrapper.parentElement !== document.body) {
+      const parent = wrapper.parentElement;
+      const pCls = (typeof parent.className === "string" ? parent.className : "").toLowerCase();
+      const pId = (parent.id || "").toLowerCase();
+      if (
+        pCls.includes("sticky") ||
+        pCls.includes("adv-") ||
+        pCls.includes("banner") ||
+        pId.includes("sticky") ||
+        pId.includes("banner")
+      ) {
+        // Если внутри родителя нет значимого полезного текста, расширяем обёртку
+        const visibleText = (parent.textContent || "").replace(/\s+/g, "").replace(/Реклама|Ad|Advertisement/g, "");
+        if (visibleText.length < 5) {
+          wrapper = parent;
+        }
+      }
+    }
+
     return wrapper;
   }
 
@@ -285,19 +360,33 @@
       return true;
     }
 
-    // Проверка атрибутов data-r-a-* (характерных для РСЯ)
+    // Проверка атрибутов data-r-a-* (характерных для РСЯ), data-new-adtune, data-sticky-adtune
     for (let i = 0; i < element.attributes.length; i++) {
       const attrName = element.attributes[i].name;
-      if (attrName.startsWith("data-r-a-") || attrName === "data-new-adtune" || attrName === "data-sticky-adtune") {
+      if (
+        attrName.startsWith("data-r-a-") ||
+        attrName === "data-new-adtune" ||
+        attrName === "data-sticky-adtune" ||
+        attrName === "data-4ee00d5a77" ||
+        attrName.startsWith("data-dd7") ||
+        attrName.startsWith("data-1ad")
+      ) {
         hideElement(findAdWrapper(element));
         return true;
       }
     }
 
-    // Проверка ссылок на переход в рекламу Яндекса / AdFox
+    // Проверка ссылок на переход в рекламу Яндекса / AdFox / Adriver
     if (element.tagName === "A") {
       const href = element.getAttribute("href") || "";
-      if (href.includes("yandex.ru/an/") || href.includes("an.yandex.ru") || href.includes("awaps.yandex.ru") || href.includes("adfox.ru") || href.includes("adriver.ru")) {
+      if (
+        href.includes("yandex.ru/an/") ||
+        href.includes("an.yandex.ru") ||
+        href.includes("awaps.yandex.ru") ||
+        href.includes("adfox.ru") ||
+        href.includes("adriver.ru") ||
+        href.includes("verify.yandex.ru/verify_target_ads")
+      ) {
         hideElement(findAdWrapper(element));
         return true;
       }
@@ -306,7 +395,28 @@
     // Проверка картинок баннеров Яндекса
     if (element.tagName === "IMG") {
       const src = element.getAttribute("src") || "";
-      if (src.includes("avatars.mds.yandex.net/get-direct") || src.includes("avatars.mds.yandex.net/get-adfox")) {
+      if (
+        src.includes("avatars.mds.yandex.net/get-direct") ||
+        src.includes("avatars.mds.yandex.net/get-adfox") ||
+        src.includes("storage.mds.yandex.net/get-canvas-html5")
+      ) {
+        hideElement(findAdWrapper(element));
+        return true;
+      }
+    }
+
+    // Проверка iframes SafeFrame и рекламных SDK
+    if (element.tagName === "IFRAME") {
+      const src = element.getAttribute("src") || "";
+      const name = element.getAttribute("name") || "";
+      if (
+        src.includes("safeframe-bundles") ||
+        src.includes("an.yandex.ru") ||
+        src.includes("adfox") ||
+        name.includes("ya_partner_") ||
+        name.includes("yandexHTML5BannerApi") ||
+        name.includes("yandex.ru/an/")
+      ) {
         hideElement(findAdWrapper(element));
         return true;
       }
@@ -316,13 +426,27 @@
     const templates = element.querySelectorAll ? element.querySelectorAll("template[shadowrootmode], template[shadowroot]") : [];
     for (const t of templates) {
       const html = t.innerHTML || "";
-      if (html.includes("yandex.ru/an/") || html.includes("adaptiveConstructorAd") || html.includes("get-direct") || html.includes("data-ad-id")) {
+      if (
+        html.includes("yandex.ru/an/") ||
+        html.includes("adaptiveConstructorAd") ||
+        html.includes("get-direct") ||
+        html.includes("data-ad-id") ||
+        html.includes("safeframe-bundles")
+      ) {
         hideElement(findAdWrapper(element));
         return true;
       }
     }
 
     return false;
+  }
+
+  function cleanEmptyContainers() {
+    // Находим все оставшиеся пустые sticky обёртки и схлопываем их
+    const wrappers = document.querySelectorAll(
+      ".yandex-sticky-adv-banner__desktop-wrapper, .yandex-sticky-adv-banner, [id^='yandex-adv-sticky-banner']"
+    );
+    wrappers.forEach((w) => hideElement(w));
   }
 
   function scan(root = document) {
@@ -338,19 +462,30 @@
       root.querySelectorAll(COMBINED_SELECTOR).forEach((el) => hideElement(findAdWrapper(el)));
 
       // Поиск ссылок на кликовые трекеры рекламы
-      root.querySelectorAll("a[href*='yandex.ru/an/'], a[href*='an.yandex.ru'], a[href*='awaps.yandex.ru'], a[href*='adfox.ru']").forEach((el) => {
+      root.querySelectorAll(
+        "a[href*='yandex.ru/an/'], a[href*='an.yandex.ru'], a[href*='awaps.yandex.ru'], a[href*='adfox.ru'], a[href*='verify.yandex.ru']"
+      ).forEach((el) => {
         hideElement(findAdWrapper(el));
       });
 
       // Поиск баннерных изображений Директа
-      root.querySelectorAll("img[src*='avatars.mds.yandex.net/get-direct'], img[src*='avatars.mds.yandex.net/get-adfox']").forEach((el) => {
+      root.querySelectorAll(
+        "img[src*='avatars.mds.yandex.net/get-direct'], img[src*='avatars.mds.yandex.net/get-adfox'], img[src*='storage.mds.yandex.net']"
+      ).forEach((el) => {
         hideElement(findAdWrapper(el));
       });
 
-      // Поиск элементов с атрибутами data-r-a-*
-      root.querySelectorAll("[data-new-adtune], [data-sticky-adtune], [data-name='adaptiveConstructorAd']").forEach((el) => {
+      // Поиск iframes рекламы и SafeFrame
+      root.querySelectorAll("iframe[src*='safeframe-bundles'], iframe[name*='ya_partner_']").forEach((el) => {
         hideElement(findAdWrapper(el));
       });
+
+      // Поиск элементов с атрибутами data-r-a-*, data-new-adtune, data-label
+      root.querySelectorAll("[data-new-adtune], [data-sticky-adtune], [data-name='adaptiveConstructorAd'], [data-label='true']").forEach((el) => {
+        hideElement(findAdWrapper(el));
+      });
+
+      cleanEmptyContainers();
     }
   }
 
@@ -361,8 +496,13 @@
       el.style.removeProperty("display");
       el.style.removeProperty("height");
       el.style.removeProperty("min-height");
+      el.style.removeProperty("max-height");
+      el.style.removeProperty("width");
+      el.style.removeProperty("min-width");
+      el.style.removeProperty("max-width");
       el.style.removeProperty("margin");
       el.style.removeProperty("padding");
+      el.style.removeProperty("background");
     });
   }
 
@@ -379,6 +519,7 @@
       for (const node of nodes) {
         if (node instanceof Element) scan(node);
       }
+      cleanEmptyContainers();
     });
   }
 
