@@ -3,7 +3,16 @@
 // пересобираем их на старте без необходимости: это экономит память и секунды CPU.
 importScripts("lib/static-meta.js", "lib/filters.js");
 
-const STATIC_RULESETS = ["ads_rules", "subscriptions"];
+const STATIC_RULESETS = [
+  "ads_rules",
+  "adguard_ru",
+  "easyprivacy_1",
+  "easyprivacy_2",
+  "easylist_1",
+  "easylist_2",
+  "easylist_3"
+];
+
 const UPDATE_ALARM = "refresh-subscriptions";
 const UPDATE_PERIOD_MINUTES = 24 * 60;
 const SITE_RULE_ID_START = 1;
@@ -35,7 +44,7 @@ async function removeFilterRules() {
     .filter((rule) => rule.id >= FILTER_RULE_ID_START)
     .map((rule) => rule.id);
   if (ids.length) await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ids });
-  await chrome.storage.local.set({ dynamicRulesReady: false });
+  await chrome.storage.local.set({ dynamicRulesReady: false, filterRules: 0 });
 }
 
 async function rebuildAllowlist(force = false) {
@@ -127,17 +136,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === UPDATE_ALARM) runUpdate(false).catch(() => {});
 });
 
-// `onRuleMatchedDebug` доступен только для распакованного расширения. Мы всё
-// равно используем его при разработке, но записываем пачками — частые запросы
-// больше не создают гонок записи в storage.local.
+// `onRuleMatchedDebug` доступен для распакованного расширения при отладке.
 let pendingMatches = [];
 let flushMatchesTimer = null;
 let statsVersion = 0;
 function queueMatch(info) {
   let host = "?";
   try { host = new URL(info.request.url).hostname; } catch (_) {}
-  // Не сохраняем полный URL: в нём могут быть поисковые запросы, токены и
-  // другие персональные данные. Для статистики достаточно домена и типа.
   pendingMatches.push({ host, type: info.request.type || "resource", at: Date.now() });
   if (!flushMatchesTimer) flushMatchesTimer = setTimeout(() => flushMatches().catch(() => {}), 750);
 }
@@ -173,11 +178,16 @@ async function getDashboard() {
     getActiveTab(),
   ]);
   const host = tab && tab.url ? normaliseHost(tab.url) : "";
+  const staticRulesTotal = Number(globalThis.STATIC_RULES_TOTAL || 115412);
+  const totalActiveRules = data.enabled ? (staticRulesTotal + (data.filterRules || 0)) : 0;
+
   return {
     ...data,
     site: host,
     isSiteAllowed: Boolean(host && data.allowlist.includes(host)),
     isWebPage: Boolean(host && /^https?:/i.test(tab.url)),
+    staticRulesTotal,
+    totalActiveRules,
   };
 }
 

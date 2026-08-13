@@ -37,7 +37,15 @@ function render(data) {
   cosmetic.checked = Boolean(data.cosmeticEnabled);
   $("stateText").textContent = enabled ? "Защита активна" : "Защита выключена";
   $("count").textContent = formatNumber(data.blockedTotal);
-  $("rules").textContent = data.filterRules ? `${formatNumber(data.filterRules)} динамических` : "встроенные активны";
+
+  if (!enabled) {
+    $("rules").textContent = "выключены";
+  } else if (data.filterRules > 0) {
+    $("rules").textContent = `${formatNumber(data.totalActiveRules || 115412)} правил (${formatNumber(data.filterRules)} динам.)`;
+  } else {
+    $("rules").textContent = `${formatNumber(data.totalActiveRules || data.staticRulesTotal || 115412)} активных правил`;
+  }
+
   $("updated").textContent = formatDate(data.filterUpdatedAt);
 
   const isSiteAllowed = Boolean(data.isSiteAllowed);

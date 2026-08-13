@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "AdGuardian",
-  "version": "1.0.0",
-  "description": "Приватный блокировщик рекламы и трекеров",
+  "version": "1.1.0",
+  "description": "Приватный блокировщик рекламы, sticky-баннеров и трекеров",
   "minimum_chrome_version": "121",
   "permissions": [
     "declarativeNetRequest",
@@ -37,13 +37,19 @@
       "matches": ["<all_urls>"],
       "js": ["content/cosmetic.js"],
       "run_at": "document_start",
-      "all_frames": true
+      "all_frames": true,
+      "match_about_blank": true
     }
   ],
   "declarative_net_request": {
     "rule_resources": [
       { "id": "ads_rules", "enabled": true, "path": "rules/ads_rules.json" },
-      { "id": "subscriptions", "enabled": true, "path": "rules/subscriptions.json" }
+      { "id": "adguard_ru", "enabled": true, "path": "rules/adguard_ru.json" },
+      { "id": "easyprivacy_1", "enabled": true, "path": "rules/easyprivacy_1.json" },
+      { "id": "easyprivacy_2", "enabled": true, "path": "rules/easyprivacy_2.json" },
+      { "id": "easylist_1", "enabled": true, "path": "rules/easylist_1.json" },
+      { "id": "easylist_2", "enabled": true, "path": "rules/easylist_2.json" },
+      { "id": "easylist_3", "enabled": true, "path": "rules/easylist_3.json" }
     ]
   }
 }
