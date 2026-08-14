@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="popup.css">
+  <title>AdGuardian</title>
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 20 6v5.4c0 4.8-3.2 8.9-8 10.1-4.8-1.2-8-5.3-8-10.1V6l8-3.5Z"/><path d="m8.4 12 2.2 2.2 5-5"/></svg>
+        </span>
+        <span>AdGuardian</span>
+      </div>
+      <label class="power" aria-label="Включить блокировку">
+        <input type="checkbox" id="toggle" checked>
+        <span class="power-track"><span class="power-knob"></span></span>
+      </label>
+    </header>
+
+    <section class="summary" aria-live="polite">
+      <div class="summary-main">
+        <span class="state-line"><span class="state-dot" id="stateDot"></span><span id="stateText">Защита активна</span></span>
+        <strong id="count">0</strong>
+        <span class="counter-label">заблокировано запросов</span>
+      </div>
+      <div class="summary-rules">
+        <strong id="rules">—</strong>
+        <span>правил</span>
+      </div>
+    </section>
+
+    <section class="site-card" id="siteCard">
+      <div class="site-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.9 5.7 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.7-3.9-9S9.5 5.6 12 3Z"/></svg>
+      </div>
+      <div class="site-copy">
+        <strong id="siteName">Открытая страница</strong>
+        <span id="siteDescription">Защита применяется автоматически</span>
+      </div>
+      <button class="site-button" id="siteToggle" type="button">Пауза</button>
+    </section>
+
+    <div class="meta-row"><span>Фильтры обновлены</span><strong id="updated">—</strong></div>
+
+    <p class="notice" id="notice" role="status"></p>
+
+    <div class="actions">
+      <button class="button primary" id="checkUpdates" type="button">Обновить фильтры</button>
+      <button class="button secondary" id="openStats" type="button">Статистика</button>
+    </div>
+    <button class="text-button" id="resetStats" type="button">Сбросить счётчик</button>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

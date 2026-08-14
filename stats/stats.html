@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdGuardian — статистика</title>
+  <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+  <main>
+    <header class="head">
+      <a class="brand" href="../popup/popup.html" aria-label="AdGuardian"><span>◈</span> AdGuardian</a>
+      <div><h1>Статистика защиты</h1><p>Только локальные данные этого браузера</p></div>
+    </header>
+
+    <section class="overview" aria-label="Сводка">
+      <article class="metric featured"><span>ЗАФИКСИРОВАНО БЛОКИРОВОК</span><strong id="total">0</strong><small>запросов остановлено</small></article>
+      <article class="metric"><span>АКТИВНЫЕ ПРАВИЛА</span><strong id="rules">—</strong><small id="updated">встроенные и обновлённые подписки</small></article>
+      <article class="metric"><span>ИСКЛЮЧЕНИЯ САЙТОВ</span><strong id="allowlist">0</strong><small>защита временно отключена</small></article>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><div><h2>Домены срабатываний</h2><p>Какие рекламные и трекинговые хосты встречались чаще</p></div></div>
+      <div id="domains" class="domains"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><div><h2>Последние срабатывания</h2><p>Полные адреса не хранятся — только домены и типы ресурсов</p></div></div>
+      <div id="recent" class="recent"></div>
+    </section>
+
+    <footer><button class="button danger" id="reset" type="button">Сбросить статистику</button></footer>
+  </main>
+  <script src="stats.js"></script>
+</body>
+</html>
