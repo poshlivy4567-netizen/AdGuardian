@@ -2,9 +2,12 @@
 node_modules/
 .pnpm-store/
 .npm/
+package-lock.json
 
-# Local filter downloads and generated diagnostics
-tools/cache/
+# Raw filter-list downloads (~4 MB, fetched via `node tools/download_filters.js`)
+tools/*.txt
+
+# Generated diagnostics
 coverage/
 .nyc_output/
 *.log
@@ -24,14 +27,16 @@ coverage/
 *.code-workspace
 .DS_Store
 Thumbs.db
+ehthumbs.db
 desktop.ini
+$RECYCLE.BIN/
 
-# Extension packaging output (source rules remain versioned)
+# Extension packaging output (generated rulesets stay versioned)
 *.crx
 *.zip
 dist/
 build/
 
-# Codex and local tool metadata
+# Chrome unpacked-load artifacts and local agent metadata
 .mimocode/
 _metadata/

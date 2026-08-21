@@ -10,14 +10,19 @@
 
   // Универсальные селекторы, безопасные на любом сайте.
   const GENERIC_SELECTOR = [
-    "ins.adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-format]",
+    "ins.adsbygoogle", ".adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-format]",
     "[data-google-query-id]", "[data-ad-unit]", "[data-ad-container]", "[data-advertisement]",
     "iframe[id^='google_ads_iframe']", "iframe[name^='google_ads_iframe']", "iframe[id^='aswift_']",
-    "[id^='div-gpt-ad']", "iframe[src*='doubleclick.net']", "iframe[src*='googlesyndication.com']",
+    "[id^='div-gpt-ad']", "[id^='google_ads_']", "iframe[src*='doubleclick.net']", "iframe[src*='googlesyndication.com']",
     "[id^='yandex_rtb']", "[id^='yandex_ad']", "[class*='yandex_rtb']", "[class*='adfox']",
-    "[data-adfox]", "iframe[src*='adfox']", "amp-ad", "amp-embed[type='adsense']",
+    "[id^='adfox_']", "[class^='adfox_']", "[data-adfox]", "iframe[src*='adfox']",
+    "iframe[src*='adserver.']", "iframe[src*='/adserver/']", "iframe[src*='/adframe']",
+    "amp-ad", "amp-embed[type='adsense']",
     ".OUTBRAIN", "[data-ob-widget]", "[id^='taboola-']", "iframe[src*='taboola.com']",
     "[id^='mgid_']", "[data-type='mgid']",
+    // Слои всплывающей и полноэкранной рекламы.
+    "[class*='popup-ad']", "[id*='popup-ad']", "[class*='popup_ad']",
+    "[class*='ad-overlay']", "[id*='ad-overlay']", "[class*='overlay-ad']", "[id*='overlay-ad']",
 
     // Яндекс Игры: внешний полноэкранный слой и его sticky-варианты.
     ".sticky-banner-container", "[class*='adv-sticky-banner-manager']",

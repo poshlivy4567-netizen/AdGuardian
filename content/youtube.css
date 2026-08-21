@@ -1,0 +1,35 @@
+/*
+ * YouTube меняет разметку рекламы чаще, чем сетевые адреса. Эти селекторы
+ * основаны на текущих косметических правилах EasyList и ограничены только
+ * доменами YouTube в manifest.json. CSS инжектируется до скриптов страницы,
+ * поэтому рекламная карточка не успевает занять место в сетке.
+ */
+html:not([data-adguardian-cosmetic="off"]) ytd-rich-item-renderer:has(> ytd-ad-slot-renderer),
+html:not([data-adguardian-cosmetic="off"]) ytd-rich-item-renderer:has(> #content > ytd-ad-slot-renderer),
+html:not([data-adguardian-cosmetic="off"]) ytd-rich-grid-renderer > #masthead-ad,
+html:not([data-adguardian-cosmetic="off"]) ytd-search-pyv-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-ad-slot-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-in-feed-ad-layout-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-display-ad-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-promoted-sparkles-web-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-promoted-video-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-compact-promoted-video-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-companion-slot-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-action-companion-ad-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-statement-banner-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-banner-promo-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-mealbar-promo-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytd-shorts:has(> .ytd-reel-video-renderer > ytd-ad-slot-renderer),
+html:not([data-adguardian-cosmetic="off"]) ytm-rich-item-renderer > ad-slot-renderer,
+html:not([data-adguardian-cosmetic="off"]) ytm-companion-slot[data-content-type] > ytm-companion-ad-renderer,
+html:not([data-adguardian-cosmetic="off"]) .ytp-ad-module,
+html:not([data-adguardian-cosmetic="off"]) .ytp-ad-overlay-container,
+html:not([data-adguardian-cosmetic="off"]) .ytp-ad-player-overlay,
+html:not([data-adguardian-cosmetic="off"]) .ytp-ad-image-overlay,
+html:not([data-adguardian-cosmetic="off"]) .ytp-ad-text-overlay,
+html:not([data-adguardian-cosmetic="off"]) .ytp-featured-product,
+html:not([data-adguardian-cosmetic="off"]) yt-overlay-product-sticker {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

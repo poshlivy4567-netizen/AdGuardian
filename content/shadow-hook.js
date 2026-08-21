@@ -9,13 +9,18 @@
   const HIDDEN_CLASS = "adguardian-shadow-ad-hidden";
   const MAX_WATCHED = 64;
   const AD_MARKER = [
-    "ins.adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]",
+    "ins.adsbygoogle", ".adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]",
     "[data-adfox]", "[id^='google_ads_iframe']", "[id^='aswift_']",
-    "[id^='yandex_rtb']", "[id^='yandex_ad']", "[id*='R-I-']",
+    "[id^='yandex_rtb']", "[id^='yandex_ad']",
     "iframe[src*='doubleclick.net']", "iframe[src*='googlesyndication.com']",
     "iframe[src*='adfox']", "iframe[src*='taboola.com']",
-    "a[href*='an.yandex.ru/count']", "a[href*='yandex.ru/an/count']",
   ].join(",");
+  // Маркеры РСЯ встречаются только на доменах Яндекса; на остальных сайтах
+  // подстрока "R-I-" может случайно совпасть с id постороннего компонента.
+  const YANDEX_AD_MARKER = [
+    "[id*='R-I-']", "a[href*='an.yandex.ru/count']", "a[href*='yandex.ru/an/count']",
+  ].join(",");
+  const CONTENT_MARKER = isYandex ? `${AD_MARKER},${YANDEX_AD_MARKER}` : AD_MARKER;
   const GENERIC_HOST_SELECTOR = [
     "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]", "[data-adfox]",
     "[id^='google_ads_iframe']", "[id^='aswift_']", "[id^='yandex_rtb']", "[id^='yandex_ad']",
@@ -92,7 +97,7 @@
   function inspect(host, root) {
     const entry = watched.get(host);
     if (!entry || !enabled() || entry.hidden) return Boolean(entry?.hidden);
-    if (host.matches(DIRECT_HOST_SELECTOR) || root.querySelector?.(AD_MARKER)) {
+    if (host.matches(DIRECT_HOST_SELECTOR) || root.querySelector?.(CONTENT_MARKER)) {
       hide(host);
       return true;
     }
@@ -147,16 +152,46 @@
   }
 
   const originalAttachShadow = Element.prototype.attachShadow;
-  if (typeof originalAttachShadow !== "function") return;
-  Object.defineProperty(Element.prototype, "attachShadow", {
-    configurable: true,
-    writable: true,
-    value(init) {
-      const root = Reflect.apply(originalAttachShadow, this, [init]);
-      if (init?.mode === "closed") watch(this, root);
-      return root;
-    },
-  });
+  if (typeof originalAttachShadow === "function") {
+    Object.defineProperty(Element.prototype, "attachShadow", {
+      configurable: true,
+      writable: true,
+      value(init) {
+        const root = Reflect.apply(originalAttachShadow, this, [init]);
+        if (init?.mode === "closed") watch(this, root);
+        return root;
+      },
+    });
+  }
+
+  // Всплывающие окна и popunder. Сетевой слой DNR блокирует переход на домен
+  // рекламы, но окно при этом всё равно открывается с ошибкой. Здесь мы
+  // откатываем сам window.open для известных popunder-сетей: окно не появляется
+  // вовсе. Список намеренно короткий и состоит только из бесспорных рекламных
+  // доменов, чтобы не задеть OAuth и обычные всплывающие окна сайтов.
+  const POPUP_AD_HOSTS = [
+    "adcash.com", "admaven.com", "adskeeper.com", "adskeeper.co.uk",
+    "adsterra.com", "adsterranetwork.com", "clickadu.com", "directrev.com",
+    "exoclick.com", "exosrv.com", "hilltopads.net", "juicyads.com",
+    "mgid.com", "onclickads.net", "popads.net", "popcash.net",
+    "popmyads.com", "popunder.net", "propellerads.com", "propellerclick.com",
+    "realsrv.com", "trafficfactory.biz", "trafficjunky.com", "tsyndicate.com",
+    "zeropark.com",
+  ];
+  const originalOpen = window.open;
+  if (typeof originalOpen === "function") {
+    window.open = function open(url, ...rest) {
+      if (enabled() && typeof url === "string" && url) {
+        try {
+          const hostname = new URL(url, location.href).hostname;
+          if (hostname && POPUP_AD_HOSTS.some((ad) => hostname === ad || hostname.endsWith(`.${ad}`))) {
+            return null;
+          }
+        } catch (_) { /* не абсолютный URL — пропускаем как есть */ }
+      }
+      return Reflect.apply(originalOpen, this, [url, ...rest]);
+    };
+  }
 
   new MutationObserver(() => {
     if (enabled()) resume();

@@ -32,10 +32,12 @@ try {
     console.log(`${name}: blocks=${p.blocks.length}, allows=${p.allows.length}`);
   }
   const subscriptions = sandbox.buildSubscriptionRules(parsed);
+  sandbox.globalThis.STATIC_POPUP_BLOCKS = subscriptions.meta.staticPopupBlocks;
   sandbox.globalThis.STATIC_TRACKER_BLOCKS = subscriptions.meta.staticTrackerBlocks;
   sandbox.globalThis.STATIC_GENERIC_BLOCKS = subscriptions.meta.staticGenericBlocks;
   const dnr = sandbox.buildDnrRules(parsed);
   console.log("Упакованный ruleset:", subscriptions.rules.length);
+  console.log("popup-блоков в статики:", subscriptions.meta.staticPopupBlocks);
   console.log("ИТОГО DNR-правил:", dnr.length);
   // валидность id и типов
   const ids = new Set(dnr.map((r) => r.id));
@@ -79,6 +81,19 @@ try {
   const documentRule = sandbox.convertNetworkRule("||site.example^", true, "document");
   if (documentRule.action.type !== "allowAllRequests") {
     throw new Error("исключение $document не превращено в allowAllRequests");
+  }
+  const popupBlock = sandbox.convertNetworkRule("||popnetwork.example^", false, "popup,third-party");
+  if (!popupBlock
+    || popupBlock.action.type !== "block"
+    || JSON.stringify(popupBlock.condition.resourceTypes) !== JSON.stringify(["main_frame"])
+    || popupBlock.condition.domainType !== "thirdParty") {
+    throw new Error("$popup не превращён в блокировку main_frame");
+  }
+  if (sandbox.convertNetworkRule("||popnetwork.example^", true, "popup")) {
+    throw new Error("исключение $popup должно пропускаться");
+  }
+  if (sandbox.convertNetworkRule("||pop.example^", false, "popup,subdocument")) {
+    throw new Error("смешение $popup с типами ресурсов должно пропускаться");
   }
   console.log("проверки парсера: пройдены");
 } catch (e) {

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AdGuardian",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Приватный блокировщик рекламы и трекеров",
   "minimum_chrome_version": "121",
   "permissions": [
@@ -50,6 +50,14 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content/cosmetic.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true
+    },
+    {
+      "matches": ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
+      "css": ["content/youtube.css"],
+      "js": ["content/youtube.js"],
       "run_at": "document_start",
       "all_frames": true,
       "match_origin_as_fallback": true
