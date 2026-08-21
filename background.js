@@ -8,7 +8,6 @@ const UPDATE_ALARM = "refresh-subscriptions";
 const UPDATE_PERIOD_MINUTES = 24 * 60;
 const SITE_RULE_ID_START = 1;
 const SITE_RULE_ID_END = 99999;
-const BUILTIN_RULES = 37;
 let updateTask = null;
 let setupTask = null;
 
@@ -134,6 +133,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 let pendingMatches = [];
 let flushMatchesTimer = null;
 let statsVersion = 0;
+let statsWriteTask = Promise.resolve();
+
+function enqueueStatsWrite(task) {
+  statsWriteTask = statsWriteTask.then(task, task);
+  return statsWriteTask;
+}
+
 function queueMatch(info) {
   let host = "?";
   try { host = new URL(info.request.url).hostname; } catch (_) {}
@@ -149,16 +155,18 @@ async function flushMatches() {
   const version = statsVersion;
   pendingMatches = [];
   if (!batch.length) return;
-  const data = await chrome.storage.local.get({ blockedTotal: 0, blockedByDomain: {}, lastBlocked: [] });
-  if (version !== statsVersion) return;
-  data.blockedTotal += batch.length;
-  for (const item of batch) data.blockedByDomain[item.host] = (data.blockedByDomain[item.host] || 0) + 1;
-  data.lastBlocked.unshift(...batch.reverse());
-  data.lastBlocked.length = Math.min(data.lastBlocked.length, 100);
-  await chrome.storage.local.set(data);
+  return enqueueStatsWrite(async () => {
+    const data = await chrome.storage.local.get({ blockedTotal: 0, blockedByDomain: {}, lastBlocked: [] });
+    if (version !== statsVersion) return;
+    data.blockedTotal += batch.length;
+    for (const item of batch) data.blockedByDomain[item.host] = (data.blockedByDomain[item.host] || 0) + 1;
+    data.lastBlocked.unshift(...batch.reverse());
+    data.lastBlocked.length = Math.min(data.lastBlocked.length, 100);
+    await chrome.storage.local.set(data);
+  });
 }
 
-chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(queueMatch);
+chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener(queueMatch);
 
 async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
@@ -176,8 +184,8 @@ async function getDashboard() {
   const host = tab && tab.url ? normaliseHost(tab.url) : "";
   return {
     ...data,
-    staticRules: data.enabled ? Number(globalThis.STATIC_SUBSCRIPTION_RULES || 0) + BUILTIN_RULES : 0,
-    totalRules: data.enabled ? Number(globalThis.STATIC_SUBSCRIPTION_RULES || 0) + BUILTIN_RULES + Number(data.filterRules || 0) : 0,
+    staticRules: data.enabled ? Number(globalThis.STATIC_SUBSCRIPTION_RULES || 0) + Number(globalThis.STATIC_BUILTIN_RULES || 0) : 0,
+    totalRules: data.enabled ? Number(globalThis.STATIC_SUBSCRIPTION_RULES || 0) + Number(globalThis.STATIC_BUILTIN_RULES || 0) + Number(data.filterRules || 0) : 0,
     site: host,
     isSiteAllowed: Boolean(host && data.allowlist.includes(host)),
     isWebPage: Boolean(host && /^https?:/i.test(tab.url)),
@@ -224,7 +232,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "resetStats") {
       statsVersion++;
       pendingMatches = [];
-      await chrome.storage.local.set({ blockedTotal: 0, blockedByDomain: {}, lastBlocked: [] });
+      await enqueueStatsWrite(() => chrome.storage.local.set({ blockedTotal: 0, blockedByDomain: {}, lastBlocked: [] }));
       return { ok: true };
     }
 

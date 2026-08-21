@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Уточнённая статистика списков: разбор опций и конвертируемость в MV3 DNR."""
-import re, collections
+from collections import Counter
+from pathlib import Path
 
 def split_opts(s):
     """Разделяет правило и опции ($...). Возвращает (body, opts_str)."""
@@ -11,13 +12,11 @@ def split_opts(s):
     return s[:idx], s[idx + 1:]
 
 def classify(path):
-    stats = collections.Counter()
-    opt_counter = collections.Counter()
-    host_simple = host_path = 0
+    stats = Counter()
     exceptions = 0
     conv_net = 0
-    conv_opt = collections.Counter()  # какие опции у конвертируемых
-    cosmetic = collections.Counter()
+    conv_opt = Counter()  # какие опции у конвертируемых
+    cosmetic = Counter()
     total = 0
     with open(path, encoding="utf-8", errors="ignore") as f:
         for line in f:
@@ -44,12 +43,10 @@ def classify(path):
                     stats["||host/path"] += 1
                 else:
                     stats["||host^"] += 1
-                    host_simple += 1
                 # конвертируемо, если опции переводимы (проверим ниже)
                 ok = True
                 if opts:
                     for o in opts.split(","):
-                        opt_counter[o.split("=")[0]] += 1
                         if o.split("=")[0] in (
                             "third-party", "script", "image", "media", "subdocument",
                             "xmlhttprequest", "object", "other", "frame", "stylesheet",
@@ -78,6 +75,7 @@ def classify(path):
     print(f"  конвертируемые по опциям: {dict(conv_opt)}")
     print("  косметика:", dict(cosmetic))
 
-for p in ["easylist.txt", "adguard_ru.txt", "easyprivacy.txt"]:
-    classify(p)
+SOURCE_DIR = Path(__file__).resolve().parent
+for filename in ["easylist.txt", "adguard_ru.txt", "easyprivacy.txt"]:
+    classify(SOURCE_DIR / filename)
     print()

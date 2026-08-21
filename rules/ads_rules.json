@@ -186,7 +186,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "yandex.ru/an/",
+      "urlFilter": "||yandex.ru/an/",
       "resourceTypes": [
         "main_frame",
         "sub_frame",
@@ -207,7 +207,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "yandex.ru/ads/",
+      "urlFilter": "||yandex.ru/ads/",
       "resourceTypes": [
         "main_frame",
         "sub_frame",
@@ -621,107 +621,6 @@
       ]
     }
   },
-  {
-    "id": 39,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "player_js",
-      "resourceTypes": [
-        "sub_frame",
-        "image",
-        "script",
-        "xmlhttprequest",
-        "media",
-        "object",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 40,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "mp_dist",
-      "resourceTypes": [
-        "sub_frame",
-        "image",
-        "script",
-        "xmlhttprequest",
-        "media",
-        "object",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 41,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "mstream",
-      "resourceTypes": [
-        "sub_frame",
-        "image",
-        "script",
-        "xmlhttprequest",
-        "media",
-        "object",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 42,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "testad=no",
-      "resourceTypes": [
-        "sub_frame",
-        "image",
-        "script",
-        "xmlhttprequest",
-        "media",
-        "object",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 43,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "nomon=1",
-      "resourceTypes": [
-        "sub_frame",
-        "image",
-        "script",
-        "xmlhttprequest",
-        "media",
-        "object",
-        "ping",
-        "other"
-      ]
-    }
-  }
-,
   {
     "id": 44,
     "priority": 10,

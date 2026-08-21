@@ -11,10 +11,13 @@
   // Универсальные селекторы, безопасные на любом сайте.
   const GENERIC_SELECTOR = [
     "ins.adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-format]",
-    "[data-google-query-id]", "[data-ad-unit]", "iframe[id^='google_ads_iframe']",
-    "iframe[name^='google_ads_iframe']", "iframe[id^='aswift_']", "[id^='yandex_rtb']",
-    "[id^='yandex_ad']", "[class*='yandex_rtb']", "[class*='adfox']", "[data-adfox]",
-    "iframe[src*='adfox']", "amp-ad", "amp-embed[type='adsense']",
+    "[data-google-query-id]", "[data-ad-unit]", "[data-ad-container]", "[data-advertisement]",
+    "iframe[id^='google_ads_iframe']", "iframe[name^='google_ads_iframe']", "iframe[id^='aswift_']",
+    "[id^='div-gpt-ad']", "iframe[src*='doubleclick.net']", "iframe[src*='googlesyndication.com']",
+    "[id^='yandex_rtb']", "[id^='yandex_ad']", "[class*='yandex_rtb']", "[class*='adfox']",
+    "[data-adfox]", "iframe[src*='adfox']", "amp-ad", "amp-embed[type='adsense']",
+    ".OUTBRAIN", "[data-ob-widget]", "[id^='taboola-']", "iframe[src*='taboola.com']",
+    "[id^='mgid_']", "[data-type='mgid']",
 
     // Яндекс Игры: внешний полноэкранный слой и его sticky-варианты.
     ".sticky-banner-container", "[class*='adv-sticky-banner-manager']",
@@ -45,8 +48,15 @@
   const GAME_MODAL_SELECTOR = ".aab-adv, .play-modal_yandex, .play-yandex-rewarded_video, [class*='play-yandex-modal'], .play-modal__inner";
   // Больше этого числа изменённых узлов за раз — дешевле один проход по документу.
   const WHOLE_DOCUMENT_THRESHOLD = 48;
-  // Фоновый обход открытых Shadow DOM не чаще, чем раз в этот интервал (мс).
+  // Полный обход используется лишь после большой пачки DOM-изменений.
   const DEEP_SCAN_INTERVAL = 2000;
+  // Не удерживаем тысячи удалённых карточек бесконечной ленты в памяти только
+  // ради восстановления inline-стилей после выключения расширения.
+  const MAX_RESTORABLE_ELEMENTS = 1200;
+  const OBSERVED_ATTRIBUTES = [
+    "class", "id", "src", "name", "data-ad-client", "data-ad-slot", "data-ad-format",
+    "data-google-query-id", "data-ad-unit", "data-ad-container", "data-advertisement", "data-adfox",
+  ];
 
   const host = location.hostname;
   const isYandex = YANDEX_SUFFIXES.some((suffix) => host === suffix || host.endsWith(`.${suffix}`));
@@ -86,7 +96,8 @@
   }
 
   function saveStyle(element) {
-    if (previousStyles.has(element)) return;
+    if (previousStyles.has(element)) return true;
+    if (previousStyles.size >= MAX_RESTORABLE_ELEMENTS) return false;
     previousStyles.set(element, {
       display: element.style.getPropertyValue("display"),
       displayPriority: element.style.getPropertyPriority("display"),
@@ -95,6 +106,7 @@
       pointerEvents: element.style.getPropertyValue("pointer-events"),
       pointerEventsPriority: element.style.getPropertyPriority("pointer-events"),
     });
+    return true;
   }
 
   function releaseGameLock() {
@@ -104,12 +116,16 @@
 
   function hide(element) {
     if (!(element instanceof Element) || element.classList.contains(HIDDEN_CLASS)) return;
-    saveStyle(element);
+    const canRestoreInlineStyle = saveStyle(element);
     element.classList.add(HIDDEN_CLASS);
     // Inline !important survives late stylesheets from the game application.
-    element.style.setProperty("display", "none", "important");
-    element.style.setProperty("visibility", "hidden", "important");
-    element.style.setProperty("pointer-events", "none", "important");
+    // После лимита полагаемся на style в content script: это не удерживает
+    // удалённые DOM-узлы в памяти и остаётся корректно обратимым.
+    if (canRestoreInlineStyle) {
+      element.style.setProperty("display", "none", "important");
+      element.style.setProperty("visibility", "hidden", "important");
+      element.style.setProperty("pointer-events", "none", "important");
+    }
     if (element.matches(GAME_MODAL_SELECTOR)) releaseGameLock();
   }
 
@@ -129,7 +145,7 @@
     if (observedRoots.has(root)) return;
     observedRoots.add(root);
     roots.add(root);
-    if (observerActive) observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "id"] });
+    if (observerActive) observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: OBSERVED_ATTRIBUTES });
   }
 
   // Дешёвая точечная проверка: один запрос селектором по корню (или одному узлу).
@@ -140,22 +156,31 @@
     if (root.querySelectorAll) for (const element of root.querySelectorAll(SELECTOR)) hide(element);
   }
 
-  // Дорогой обход: поиск открытых Shadow DOM. Вызывается редко и не из observer.
-  function deepScan() {
+  // Поиск открытых Shadow DOM в новом поддереве. В отличие от полного обхода
+  // документа, стоимость пропорциональна только что добавленным узлам.
+  function discoverOpenShadowRoots(startRoot) {
     if (!shouldHide()) return;
-    ensureStyle(document);
-    const queue = [document];
+    const queue = [startRoot];
     while (queue.length) {
       const root = queue.pop();
       if (!root.querySelectorAll) continue;
-      for (const element of root.querySelectorAll("*")) {
+      const visit = (element) => {
         const shadow = element.shadowRoot;
-        if (!shadow) continue;
+        if (!shadow) return;
         observeRoot(shadow);
         scan(shadow);
         queue.push(shadow);
-      }
+      };
+      if (root instanceof Element) visit(root);
+      for (const element of root.querySelectorAll("*")) visit(element);
     }
+  }
+
+  // Дорогой обход всего документа нужен только для первоначальной проверки и
+  // крупных DOM-пакетов, когда точечный обход дороже.
+  function deepScan() {
+    ensureStyle(document);
+    discoverOpenShadowRoots(document);
   }
 
   function scheduleDeepScan() {
@@ -171,12 +196,18 @@
   function restore() {
     for (const [element, previous] of previousStyles) restoreElement(element, previous);
     previousStyles.clear();
+    // Элементы после лимита не получили inline-стили, поэтому их достаточно
+    // освободить от служебного класса. Это также очищает уже отключённые узлы.
+    for (const root of roots) {
+      if (!root.querySelectorAll) continue;
+      for (const element of root.querySelectorAll(`.${HIDDEN_CLASS}`)) element.classList.remove(HIDDEN_CLASS);
+    }
   }
 
   function startObserver() {
     if (observerActive) return;
     observerActive = true;
-    for (const root of roots) observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "id"] });
+    for (const root of roots) observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: OBSERVED_ATTRIBUTES });
   }
 
   function stopObserver() {
@@ -205,10 +236,13 @@
       if (!observerActive) return;
       if (nodes.length > WHOLE_DOCUMENT_THRESHOLD) {
         scan();
+        scheduleDeepScan();
       } else {
-        for (const node of nodes) scan(node);
+        for (const node of nodes) {
+          scan(node);
+          discoverOpenShadowRoots(node);
+        }
       }
-      scheduleDeepScan();
     });
   }
 
@@ -223,7 +257,7 @@
   const observer = new MutationObserver((records) => {
     let changed = null;
     for (const record of records) {
-      // Смена class/id проверяется точечно на самом элементе: поддерево не трогаем.
+      // Смена атрибута рекламного контейнера проверяется точечно: поддерево не трогаем.
       if (record.type === "attributes") {
         (changed ||= []).push(record.target);
         continue;

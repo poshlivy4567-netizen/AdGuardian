@@ -1,6 +1,7 @@
 // Проверяет, что обновление динамических фильтров не удаляет исключения сайтов.
 const assert = require("assert");
 const fs = require("fs");
+const path = require("path");
 const vm = require("vm");
 
 const store = {
@@ -42,7 +43,7 @@ const chrome = {
 
 const sandbox = { console, chrome, setTimeout, clearTimeout, URL, AbortController, globalThis: { STATIC_TRACKER_BLOCKS: 0, STATIC_GENERIC_BLOCKS: 0 } };
 vm.createContext(sandbox);
-vm.runInContext(fs.readFileSync("lib/filters.js", "utf8"), sandbox);
+vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "lib", "filters.js"), "utf8"), sandbox);
 
 (async () => {
   const count = await sandbox.applyCachedFilters();
@@ -55,5 +56,20 @@ vm.runInContext(fs.readFileSync("lib/filters.js", "utf8"), sandbox);
   store.enabled = false;
   await sandbox.applyCachedFilters();
   assert.strictEqual(JSON.stringify(dynamicRules), JSON.stringify(before), "disabled blocker must not alter dynamic rules");
+
+  // Пользовательские allowAllRequests делят динамическую квоту с фильтрами.
+  // При почти заполненной квоте движок обязан уменьшить набор фильтров, а не
+  // сорвать обновление и не удалить whitelist.
+  store.enabled = true;
+  dynamicRules = Array.from({ length: 29999 }, (_, index) => ({
+    id: index + 1,
+    priority: 100,
+    action: { type: "allowAllRequests" },
+    condition: { requestDomains: [`site-${index}.example`], resourceTypes: ["main_frame", "sub_frame"] },
+  }));
+  const constrainedCount = await sandbox.applyCachedFilters();
+  assert.strictEqual(constrainedCount, 1, "filters must fit the remaining dynamic-rule quota");
+  assert.strictEqual(dynamicRules.length, 30000, "dynamic rules must not exceed Chrome's safe limit");
+  assert(dynamicRules.some((rule) => rule.id === 1), "allowlist must survive a quota-constrained refresh");
   console.log("runtime integration: passed");
 })().catch((error) => { console.error(error); process.exit(1); });

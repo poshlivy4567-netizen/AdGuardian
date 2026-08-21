@@ -1,126 +1,165 @@
-// Выполняется в MAIN world раньше кода страницы. Закрытый Shadow DOM нельзя
-// открыть после создания, но можно безопасно отследить его host в момент создания.
-// Креатив анимируется постоянно, поэтому после скрытия наблюдатель за поддеревом
-// отключается — остаётся только дешёвый контроль style-атрибута самого host.
+// Выполняется в MAIN world до кода страницы. Закрытый Shadow DOM нельзя читать
+// из content script, но attachShadow возвращает root вызывающему коду. Мы
+// используем это короткое окно только для проверяемых признаков рекламы и
+// скрываем внешний host, не вмешиваясь в обычные Web Components.
 (() => {
   "use strict";
 
   const STATE_ATTRIBUTE = "data-adguardian-cosmetic";
-  const HIDDEN_CLASS = "adguardian-yandex-ad-host-hidden";
-  // Признаки креатива РСЯ внутри тени: счётчик an.yandex.ru и контейнеры R-I-*.
-  const AD_MARKER = [
-    "a[href*='an.yandex.ru/count']",
-    "a[href*='yandex.ru/an/count']",
-    "[id*='R-I-']",
-    "iframe[src*='adfox']",
-  ].join(",");
-  const HOST_SELECTOR = "[id^='yandex_rtb'], [id^='yandex_ad'], [class*='yandex_rtb'], [data-adfox], [id*='R-I-']";
-  // Защита от страниц, создающих сотни закрытых теней.
+  const HIDDEN_CLASS = "adguardian-shadow-ad-hidden";
   const MAX_WATCHED = 64;
+  const AD_MARKER = [
+    "ins.adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]",
+    "[data-adfox]", "[id^='google_ads_iframe']", "[id^='aswift_']",
+    "[id^='yandex_rtb']", "[id^='yandex_ad']", "[id*='R-I-']",
+    "iframe[src*='doubleclick.net']", "iframe[src*='googlesyndication.com']",
+    "iframe[src*='adfox']", "iframe[src*='taboola.com']",
+    "a[href*='an.yandex.ru/count']", "a[href*='yandex.ru/an/count']",
+  ].join(",");
+  const GENERIC_HOST_SELECTOR = [
+    "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]", "[data-adfox]",
+    "[id^='google_ads_iframe']", "[id^='aswift_']", "[id^='yandex_rtb']", "[id^='yandex_ad']",
+  ].join(",");
+  const YANDEX_SUFFIXES = [
+    "yandex.ru", "ya.ru", "dzen.ru", "yandex.by", "yandex.kz", "yandex.uz",
+    "yandex.com", "yandex.com.tr", "yandex.eu", "yandex.fr", "yandex.net",
+  ];
+  const isYandex = YANDEX_SUFFIXES.some((suffix) => {
+    const host = location.hostname;
+    return host === suffix || host.endsWith(`.${suffix}`);
+  });
+  const DIRECT_HOST_SELECTOR = isYandex
+    ? `${GENERIC_HOST_SELECTOR}, [class*='yandex_rtb'], [id*='R-I-']`
+    : GENERIC_HOST_SELECTOR;
 
-  const watched = new Map();   // host -> { styleObserver, rootObserver }
-  const hidden = new Map();    // host -> { display, priority }
-  let dirtyRoots = null;       // корни с мутациями, ждущие проверки в кадре
+  // host -> { root, rootObserver, styleObserver, hidden }
+  const watched = new Map();
+  let dirtyHosts = null;
+  let frameScheduled = false;
 
   function enabled() {
-    return document.documentElement.getAttribute(STATE_ATTRIBUTE) === "on";
+    return document.documentElement?.getAttribute(STATE_ATTRIBUTE) !== "off";
   }
 
   function releaseGameLock() {
-    const body = document.body;
-    if (!body) return;
-    body.classList.remove("main-body_modal_yes", "main-body_scroll-hidden_yes");
+    document.body?.classList.remove("main-body_modal_yes", "main-body_scroll-hidden_yes");
   }
 
-  // Страница может сбросить inline-стиль host — восстанавливаем скрытие.
-  function watchHostStyle(host) {
+  function enforceHidden(host) {
+    if (!host.classList.contains(HIDDEN_CLASS)) host.classList.add(HIDDEN_CLASS);
+    if (
+      host.style.getPropertyValue("display") !== "none" ||
+      host.style.getPropertyPriority("display") !== "important"
+    ) host.style.setProperty("display", "none", "important");
+  }
+
+  function stopRootObserver(host) {
     const entry = watched.get(host);
-    if (!entry || entry.styleObserver) return;
-    entry.styleObserver = new MutationObserver(() => {
-      if (hidden.has(host)) host.style.setProperty("display", "none", "important");
-    });
-    entry.styleObserver.observe(host, { attributes: true, attributeFilter: ["style", "class"] });
+    if (entry?.rootObserver) {
+      entry.rootObserver.disconnect();
+      entry.rootObserver = null;
+    }
   }
 
   function hide(host) {
-    if (hidden.has(host)) return;
-    hidden.set(host, {
+    const entry = watched.get(host);
+    if (!entry || entry.hidden) return;
+    entry.hidden = {
       display: host.style.getPropertyValue("display"),
       priority: host.style.getPropertyPriority("display"),
-    });
-    host.classList.add(HIDDEN_CLASS);
-    host.style.setProperty("display", "none", "important");
+    };
+    enforceHidden(host);
     releaseGameLock();
+    if (!entry.styleObserver) {
+      entry.styleObserver = new MutationObserver(() => {
+        if (entry.hidden && enabled()) enforceHidden(host);
+      });
+      entry.styleObserver.observe(host, { attributes: true, attributeFilter: ["style", "class"] });
+    }
+    stopRootObserver(host);
   }
 
-  function restore() {
-    for (const [host, previous] of hidden) {
-      host.classList.remove(HIDDEN_CLASS);
-      if (previous.display) host.style.setProperty("display", previous.display, previous.priority);
-      else host.style.removeProperty("display");
-    }
-    hidden.clear();
+  function restoreHost(host, entry) {
+    if (!entry.hidden) return;
+    host.classList.remove(HIDDEN_CLASS);
+    if (entry.hidden.display) host.style.setProperty("display", entry.hidden.display, entry.hidden.priority);
+    else host.style.removeProperty("display");
+    entry.hidden = null;
+    entry.styleObserver?.disconnect();
+    entry.styleObserver = null;
   }
 
   function inspect(host, root) {
-    if (!enabled() || hidden.has(host)) return true;
-    if (host.matches(HOST_SELECTOR) || (root.querySelector && root.querySelector(AD_MARKER))) {
+    const entry = watched.get(host);
+    if (!entry || !enabled() || entry.hidden) return Boolean(entry?.hidden);
+    if (host.matches(DIRECT_HOST_SELECTOR) || root.querySelector?.(AD_MARKER)) {
       hide(host);
       return true;
     }
     return false;
   }
 
-  // Одна проверка на кадр вместо проверки на каждую мутацию.
-  function markDirty(host, root) {
-    (dirtyRoots ||= new Set()).add([host, root]);
+  function startRootObserver(host) {
+    const entry = watched.get(host);
+    if (!entry || entry.rootObserver || entry.hidden || !enabled()) return;
+    entry.rootObserver = new MutationObserver(() => markDirty(host));
+    entry.rootObserver.observe(entry.root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "id", "src", "data-ad-client", "data-ad-slot", "data-ad-unit", "data-adfox"],
+    });
+  }
+
+  function markDirty(host) {
+    (dirtyHosts ||= new Set()).add(host);
+    if (frameScheduled) return;
+    frameScheduled = true;
     requestAnimationFrame(() => {
-      const batch = dirtyRoots;
-      dirtyRoots = null;
-      if (!batch) return;
-      for (const [h, r] of batch) {
-        if (inspect(h, r)) stopRootObserver(h);
+      frameScheduled = false;
+      const batch = dirtyHosts;
+      dirtyHosts = null;
+      if (!batch || !enabled()) return;
+      for (const dirtyHost of batch) {
+        const entry = watched.get(dirtyHost);
+        if (entry && !inspect(dirtyHost, entry.root)) startRootObserver(dirtyHost);
       }
     });
   }
 
-  function stopRootObserver(host) {
-    const entry = watched.get(host);
-    if (entry && entry.rootObserver) {
-      entry.rootObserver.disconnect();
-      entry.rootObserver = null;
-    }
-    if (hidden.has(host)) watchHostStyle(host);
-  }
-
   function watch(host, root) {
     if (watched.has(host) || watched.size >= MAX_WATCHED) return;
-    const entry = { styleObserver: null, rootObserver: null };
-    watched.set(host, entry);
-    if (inspect(host, root)) {
+    watched.set(host, { root, rootObserver: null, styleObserver: null, hidden: null });
+    if (!inspect(host, root)) startRootObserver(host);
+  }
+
+  function suspend() {
+    for (const [host, entry] of watched) {
       stopRootObserver(host);
-      return;
+      restoreHost(host, entry);
     }
-    entry.rootObserver = new MutationObserver(() => markDirty(host, root));
-    entry.rootObserver.observe(root, { childList: true, subtree: true });
+  }
+
+  function resume() {
+    for (const [host, entry] of watched) {
+      if (!inspect(host, entry.root)) startRootObserver(host);
+    }
   }
 
   const originalAttachShadow = Element.prototype.attachShadow;
+  if (typeof originalAttachShadow !== "function") return;
   Object.defineProperty(Element.prototype, "attachShadow", {
     configurable: true,
     writable: true,
     value(init) {
       const root = Reflect.apply(originalAttachShadow, this, [init]);
-      if (init && init.mode === "closed") watch(this, root);
+      if (init?.mode === "closed") watch(this, root);
       return root;
     },
   });
 
   new MutationObserver(() => {
-    if (enabled()) {
-      for (const host of hidden.keys()) host.style.setProperty("display", "none", "important");
-    } else {
-      restore();
-    }
+    if (enabled()) resume();
+    else suspend();
   }).observe(document.documentElement, { attributes: true, attributeFilter: [STATE_ATTRIBUTE] });
 })();

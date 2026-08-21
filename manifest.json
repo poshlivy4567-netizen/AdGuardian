@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AdGuardian",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Приватный блокировщик рекламы и трекеров",
   "minimum_chrome_version": "121",
   "permissions": [
@@ -40,17 +40,19 @@
       "all_frames": true
     },
     {
-      "matches": ["*://*.yandex.ru/*"],
+      "matches": ["<all_urls>"],
       "js": ["content/shadow-hook.js"],
       "run_at": "document_start",
       "all_frames": true,
+      "match_origin_as_fallback": true,
       "world": "MAIN"
     },
     {
       "matches": ["<all_urls>"],
       "js": ["content/cosmetic.js"],
       "run_at": "document_start",
-      "all_frames": true
+      "all_frames": true,
+      "match_origin_as_fallback": true
     }
   ],
   "declarative_net_request": {
