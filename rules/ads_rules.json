@@ -630,5 +630,167 @@
     "condition": {
       "urlFilter": "||yandex.ru/an/count"
     }
+  },
+  {
+    "id": 45,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||buzzoola.com^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 46,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||kimberlite.io^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 47,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||traffaret.com^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 48,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||i-trailer.ru^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 49,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||videoroll.net^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 50,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||vpaut.ru^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 51,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||aj2635.bid^",
+      "resourceTypes": [
+        "main_frame",
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 52,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||bid^",
+      "resourceTypes": [
+        "main_frame",
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
   }
 ]

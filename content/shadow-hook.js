@@ -8,6 +8,17 @@
   const STATE_ATTRIBUTE = "data-adguardian-cosmetic";
   const HIDDEN_CLASS = "adguardian-shadow-ad-hidden";
   const MAX_WATCHED = 64;
+
+  // Определяется ДО первого использования (раньше стоял ниже — ReferenceError).
+  const YANDEX_SUFFIXES = [
+    "yandex.ru", "ya.ru", "dzen.ru", "yandex.by", "yandex.kz", "yandex.uz",
+    "yandex.com", "yandex.com.tr", "yandex.eu", "yandex.fr", "yandex.net",
+  ];
+  const isYandex = YANDEX_SUFFIXES.some((suffix) => {
+    const host = location.hostname;
+    return host === suffix || host.endsWith(`.${suffix}`);
+  });
+
   const AD_MARKER = [
     "ins.adsbygoogle", ".adsbygoogle", "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]",
     "[data-adfox]", "[id^='google_ads_iframe']", "[id^='aswift_']",
@@ -25,14 +36,6 @@
     "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]", "[data-adfox]",
     "[id^='google_ads_iframe']", "[id^='aswift_']", "[id^='yandex_rtb']", "[id^='yandex_ad']",
   ].join(",");
-  const YANDEX_SUFFIXES = [
-    "yandex.ru", "ya.ru", "dzen.ru", "yandex.by", "yandex.kz", "yandex.uz",
-    "yandex.com", "yandex.com.tr", "yandex.eu", "yandex.fr", "yandex.net",
-  ];
-  const isYandex = YANDEX_SUFFIXES.some((suffix) => {
-    const host = location.hostname;
-    return host === suffix || host.endsWith(`.${suffix}`);
-  });
   const DIRECT_HOST_SELECTOR = isYandex
     ? `${GENERIC_HOST_SELECTOR}, [class*='yandex_rtb'], [id*='R-I-']`
     : GENERIC_HOST_SELECTOR;
@@ -158,7 +161,9 @@
       writable: true,
       value(init) {
         const root = Reflect.apply(originalAttachShadow, this, [init]);
-        if (init?.mode === "closed") watch(this, root);
+        try {
+          if (init?.mode === "closed") watch(this, root);
+        } catch (_) { /* не мешаем странице из-за сбоя фильтрации */ }
         return root;
       },
     });
@@ -184,17 +189,21 @@
       if (enabled() && typeof url === "string" && url) {
         try {
           const hostname = new URL(url, location.href).hostname;
-          if (hostname && POPUP_AD_HOSTS.some((ad) => hostname === ad || hostname.endsWith(`.${ad}`))) {
-            return null;
-          }
+          const isAdHost = POPUP_AD_HOSTS.some((ad) => hostname === ad || hostname.endsWith(`.${ad}`));
+          // Дешёвые рекламные TLD (.bid и т.п.) используются сетями popunder
+          // для ротации: ajNNNN.bid и подобные. Отсекаем до навигации.
+          const isAdTld = hostname.endsWith(".bid");
+          if (hostname && (isAdHost || isAdTld)) return null;
         } catch (_) { /* не абсолютный URL — пропускаем как есть */ }
       }
       return Reflect.apply(originalOpen, this, [url, ...rest]);
     };
   }
 
-  new MutationObserver(() => {
-    if (enabled()) resume();
-    else suspend();
-  }).observe(document.documentElement, { attributes: true, attributeFilter: [STATE_ATTRIBUTE] });
+  try {
+    new MutationObserver(() => {
+      if (enabled()) resume();
+      else suspend();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: [STATE_ATTRIBUTE] });
+  } catch (_) { /* documentElement может отсутствовать в редких окружениях */ }
 })();

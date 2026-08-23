@@ -24,6 +24,10 @@
     "[class*='popup-ad']", "[id*='popup-ad']", "[class*='popup_ad']",
     "[class*='ad-overlay']", "[id*='ad-overlay']", "[class*='overlay-ad']", "[id*='overlay-ad']",
 
+    // Inpage/sticky видеореклама: Vidimost (VPAUT) и её iframe-хостинги.
+    "[id*='vid_vpaut']", "[id^='vid_roll']", "iframe[src*='vpaut']",
+    "iframe[src*='i-trailer.ru']", "iframe[src*='videoroll.net']", "iframe[src*='buzzoola.com']",
+
     // Яндекс Игры: внешний полноэкранный слой и его sticky-варианты.
     ".sticky-banner-container", "[class*='adv-sticky-banner-manager']",
     "[class*='yandex-sticky-adv-banner']", "#yandex-adv-sticky-banner-desktop",
