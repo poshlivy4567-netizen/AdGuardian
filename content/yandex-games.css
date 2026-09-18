@@ -1,16 +1,51 @@
 /*
  * Яндекс Игры.
- * Рекламный креатив находится в закрытом Shadow DOM, однако его три внешних
- * уровня доступны: .aab-adv -> .play-modal_yandex -> #yandex_rtb_R-A-*.
- * Стили content script браузер применяет до сценариев страницы, поэтому модалка
- * не успевает перехватить экран.
+ * Читаемый из light DOM слой рекламы: модальные форматы .aab-adv ->
+ * .play-modal_yandex -> #yandex_rtb_R-A-*, лента баннеров в правой колонке —
+ * виджет с data-name="adWrapper" внутри контейнера adv-focusable, а промо
+ * сервиса — .prowo-container. Сам креатив лежит в закрытом Shadow DOM, но для
+ * скрытия достаточно внешнего слоя.
+ * Стили content script браузер применяет до сценариев страницы, поэтому
+ * модалка не успевает перехватить экран.
  */
-html:not([data-adguardian-cosmetic="off"]) body.main-body_game .aab-adv,
-html:not([data-adguardian-cosmetic="off"]) body.main-body_game .play-modal_yandex,
-html:not([data-adguardian-cosmetic="off"]) body.main-body_game .play-yandex-rewarded_video,
-html:not([data-adguardian-cosmetic="off"]) body.main-body_game [id^="yandex_rtb_R-A-"],
-html:not([data-adguardian-cosmetic="off"]) body.main-body_game .sticky-banner-container:has([id^="yandex_rtb"]),
-html:not([data-adguardian-cosmetic="off"]) body.main-body_game [class*="yandex-sticky-adv-banner"] {
+html:not([data-adguardian-cosmetic="off"]) body.main-body_game .aab-adv:not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) body.main-body_game .play-modal_yandex:not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) body.main-body_game .play-yandex-rewarded_video:not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) body.main-body_game [id^="yandex_rtb_R-A-"]:not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) body.main-body_game .sticky-banner-container:has([id^="yandex_rtb"]):not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) body.main-body_game [class*="yandex-sticky-adv-banner"]:not([data-adguardian-reveal]) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/*
+ * Рекламная колонка сервиса: виджет отдаёт карточки разметкой с
+ * data-name="adWrapper" внутри контейнера adv-focusable, а когда сеть уже
+ * заблокирована — оставляет на их месте пустые skeleton-заглушки. Прячем и
+ * карточку, и её обёртку: :has(> .adv-focusable) совпадает только с контейнером
+ * рекламного слота, поэтому пустая колонка исчезает, а обычная вёрстка — нет.
+ */
+html:not([data-adguardian-cosmetic="off"]) [data-name="adWrapper"],
+html:not([data-adguardian-cosmetic="off"]) [data-name="social-ad-label"],
+html:not([data-adguardian-cosmetic="off"]) .adv-focusable,
+html:not([data-adguardian-cosmetic="off"]) div[class*="__desktop-wrapper"]:has(> .adv-focusable) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/*
+ * Промо-заставка сервиса (prowo) перекрывает игру блюром и держит её, пока не
+ * пролистаешь слайды про приложение Яндекс Игры. Это рекламный слой сервиса:
+ * убираем его раньше, чем он получит управление, а content script закрывает
+ * промо штатной кнопкой сайта — без этого игра остаётся на паузе.
+ * Атрибут data-adguardian-reveal возвращает на экран слой, который сайт закрыть
+ * не дал: его нужно показать игроку, иначе игра останется неинтерактивной.
+ */
+html:not([data-adguardian-cosmetic="off"]) .prowo-container:not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) .prowo__wrapper:not([data-adguardian-reveal]),
+html:not([data-adguardian-cosmetic="off"]) .close-button_type_promo-popup:not([data-adguardian-reveal]) {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;

@@ -792,5 +792,38 @@
         "other"
       ]
     }
+  },
+  {
+    "id": 53,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||avatars.mds.yandex.net/get-direct/",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 54,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||yabs.yandex.ru^",
+      "resourceTypes": [
+        "image",
+        "script",
+        "xmlhttprequest",
+        "media",
+        "sub_frame",
+        "object",
+        "ping",
+        "other"
+      ]
+    }
   }
 ]

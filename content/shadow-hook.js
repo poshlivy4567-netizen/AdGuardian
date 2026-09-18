@@ -26,19 +26,31 @@
     "iframe[src*='doubleclick.net']", "iframe[src*='googlesyndication.com']",
     "iframe[src*='adfox']", "iframe[src*='taboola.com']",
   ].join(",");
-  // Маркеры РСЯ встречаются только на доменах Яндекса; на остальных сайтах
-  // подстрока "R-I-" может случайно совпасть с id постороннего компонента.
-  const YANDEX_AD_MARKER = [
-    "[id*='R-I-']", "a[href*='an.yandex.ru/count']", "a[href*='yandex.ru/an/count']",
+  // Ссылка на счётчик Директа/РСЯ — однозначный признак рекламы на ЛЮБОМ
+  // сайте: партнёрские площадки получают РСЯ той же разметкой. Раньше эти
+  // маркеры лежали в YANDEX_AD_MARKER и вне доменов Яндекса не применялись,
+  // поэтому реклама на сторонних сайтах не скрывалась.
+  const DIRECT_MARKER = [
+    "a[href*='yandex.ru/an/count']", "a[href*='an.yandex.ru/count']",
+    "a[href*='yabs.yandex.ru']",
   ].join(",");
-  const CONTENT_MARKER = isYandex ? `${AD_MARKER},${YANDEX_AD_MARKER}` : AD_MARKER;
+  // "R-I-" — слишком общая подстрока: на посторонних сайтах она может
+  // случайно совпасть с id обычного компонента. Оставляем только на Яндексе.
+  const YANDEX_AD_MARKER = isYandex ? "[id*='R-I-']" : "";
+  const CONTENT_MARKER = [AD_MARKER, DIRECT_MARKER, YANDEX_AD_MARKER].filter(Boolean).join(",");
   const GENERIC_HOST_SELECTOR = [
     "[data-ad-client]", "[data-ad-slot]", "[data-ad-unit]", "[data-adfox]",
     "[id^='google_ads_iframe']", "[id^='aswift_']", "[id^='yandex_rtb']", "[id^='yandex_ad']",
   ].join(",");
+  // Обёртки РСЯ на сторонних площадках: их содержимое лежит в закрытом
+  // декларативном Shadow DOM, поэтому скрывать приходится сам host.
+  const RSYA_HOST_SELECTOR = [
+    "div[aria-label*='екламн']", "[class*='AdvRsyaCrossPage']",
+    "[id^='AdvRsyaCrossPage-']", "[class~='DirectInline']",
+  ].join(",");
   const DIRECT_HOST_SELECTOR = isYandex
-    ? `${GENERIC_HOST_SELECTOR}, [class*='yandex_rtb'], [id*='R-I-']`
-    : GENERIC_HOST_SELECTOR;
+    ? `${GENERIC_HOST_SELECTOR}, ${RSYA_HOST_SELECTOR}, [class*='yandex_rtb'], [id*='R-I-']`
+    : `${GENERIC_HOST_SELECTOR}, ${RSYA_HOST_SELECTOR}`;
 
   // host -> { root, rootObserver, styleObserver, hidden }
   const watched = new Map();
